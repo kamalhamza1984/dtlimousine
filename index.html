@@ -1003,15 +1003,86 @@
             provinceGroup.style.display = serviceType === 'intercity' || serviceType === 'internal' ? 'flex' : 'none';
         }
 
-        function autoCalculateDistance() {
-            alert(translations[currentLang].alertDistance);
+        async function autoCalculateDistance() {
+    const pickup = document.getElementById('pickupPoint').value;
+    const dropoff = document.getElementById('dropoffPoint').value;
+    const roadPref = document.getElementById('roadPreference').value;
+    const distanceInput = document.getElementById('distanceKm');
+
+    if (!pickup || !dropoff) return;
+
+    distanceInput.value = ""; 
+    distanceInput.placeholder = currentLang === "ar" ? "جاري حساب مسار الطريق..." : "Calculating route...";
+
+    try {
+        const resPickup = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pickup + ' Egypt')}&email=kamalhamza1984@gmail.com`);
+        const dataPickup = await resPickup.json();
+
+        const resDropoff = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dropoff + ' Egypt')}&email=kamalhamza1984@gmail.com`);
+        const dataDropoff = await resDropoff.json();
+
+        if (dataPickup.length === 0 || dataDropoff.length === 0) {
+            distanceInput.placeholder = currentLang === "ar" ? "لم نتمكن من تحديد العنوان" : "Could not identify addresses.";
+            return;
         }
 
-        function handleCalculation(event) {
-            event.preventDefault();
-            const price = Math.floor(Math.random() * 500) + 100;
-            document.getElementById('calculatedPrice').innerText = translations[currentLang].priceEst + price + " جنيه";
-            document.getElementById('resultBox').style.display = 'block';
+        const lat1 = dataPickup[0].lat; const lon1 = dataPickup[0].lon;
+        const lat2 = dataDropoff[0].lat; const lon2 = dataDropoff[0].lon;
+
+        const resRoute = await fetch(`https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=false`);
+        const dataRoute = await resRoute.json();
+
+        if (dataRoute.routes && dataRoute.routes.length > 0) {
+            let distanceInKm = Math.round(dataRoute.routes[0].distance / 1000);
+            if (roadPref === 'highway') {
+                distanceInKm = Math.round(distanceInKm * 1.18); // معامل أمان للطرق السريعة والمحاور
+            }
+            distanceInput.value = distanceInKm;
+        } else {
+            const R = 6371; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            distanceInput.value = Math.round(R * c * (roadPref === 'highway' ? 1.35 : 1.20));
+        }
+        
+        // تشغيل الحساب الفوري للسعر بناءً على الكيلومترات الجديدة ونوع السيارة
+        calculatePriceImmediately();
+        
+    } catch (error) {
+        console.error(error);
+        distanceInput.placeholder = currentLang === "ar" ? "اكتب المسافة يدوياً" : "Type distance manually";
+    }
+}
+
+function calculatePriceImmediately() {
+    const distance = parseFloat(document.getElementById('distanceKm').value);
+    const carType = document.getElementById('carType').value;
+    const resultBox = document.getElementById('resultBox');
+    const priceText = document.getElementById('calculatedPrice');
+
+    if (!distance || isNaN(distance)) return;
+
+    // تسعير الكيلو لكل عربية (تقريبي وتقدر تعدله براحتك)
+    let ratePerKm = 6; // السعر الافتراضي
+    if (carType === 'tipo') ratePerKm = 7;     // فيات تيبو
+    if (carType === 'hiace') ratePerKm = 10;   // تويوتا هياص فان
+
+    let totalPrice = distance * ratePerKm;
+    
+    // حد أدنى لأي رحلة لضمان تغطية مصاريف التحرك والبنزين
+    if (totalPrice < 150) totalPrice = 150; 
+
+    priceText.innerText = (currentLang === "ar" ? "السعر التقديري: " : "Estimated Price: ") + Math.round(totalPrice) + (currentLang === "ar" ? " جنيه مصري" : " EGP");
+    resultBox.style.display = 'block';
+}
+
+// ربط دالة الحساب بالزر وزر الإرسال
+function handleCalculation(event) {
+    event.preventDefault();
+    autoCalculateDistance();
+}
             
             const wa1 = document.getElementById('submitToWhatsapp');
             wa1.href = `https://wa.me/201002820186?text=حجز ليموزين: ${document.getElementById('clientName').value}`;
