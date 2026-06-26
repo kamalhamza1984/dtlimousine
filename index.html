@@ -941,43 +941,43 @@
         }
 
         function submitToWebsite(event) {
-            if(event) event.preventDefault();
+    if(event) event.preventDefault();
 
-            const name = document.getElementById('clientName').value;
-            const phone = document.getElementById('clientPhone').value;
-            if(!name || !phone) {
-                alert(currentLang === "ar" ? "برجاء ملء الاسم ورقم الهاتف أولاً لتأكيد الحجز." : "Please fill name and phone.");
-                return;
-            }
+    const name = document.getElementById('clientName').value;
+    const phone = document.getElementById('clientPhone').value;
+    if(!name || !phone) {
+        alert(currentLang === "ar" ? "برجاء ملء الاسم ورقم الهاتف أولاً لتأكيد الحجز." : "Please fill name and phone.");
+        return;
+    }
 
-            const bookingData = {
-                clientName: name,
-                clientPhone: phone,
-                clientEmail: document.getElementById('clientEmail').value,
-                tripDate: document.getElementById('tripDate').value,
-                tripTime: document.getElementById('tripTime').value,
-                tripRoute: document.getElementById('tripRoute').value,
-                serviceType: document.getElementById('serviceType').value,
-                roadPreference: document.getElementById('roadPreference').value,
-                carCategory: document.getElementById('carCategory').value,
-                pickupPoint: document.getElementById('pickupPoint').value,
-                dropoffPoint: document.getElementById('dropoffPoint').value,
-                distance: document.getElementById('distanceKm').value,
-                calculatedPrice: document.getElementById('calculatedPrice').innerText
-            };
+    // تجهيز البيانات كـ URLSearchParams لضمان قراءتها بنجاح في جوجل بدون خطأ JSON
+    const formData = new URLSearchParams();
+    formData.append('clientName', name);
+    formData.append('clientPhone', phone);
+    formData.append('clientEmail', document.getElementById('clientEmail').value);
+    formData.append('tripDate', document.getElementById('tripDate').value);
+    formData.append('tripTime', document.getElementById('tripTime').value);
+    formData.append('tripRoute', document.getElementById('tripRoute').value);
+    formData.append('serviceType', document.getElementById('serviceType').value);
+    formData.append('roadPreference', document.getElementById('roadPreference').value);
+    formData.append('carCategory', document.getElementById('carCategory').value);
+    formData.append('pickupPoint', document.getElementById('pickupPoint').value);
+    formData.append('dropoffPoint', document.getElementById('dropoffPoint').value);
+    formData.append('distance', document.getElementById('distanceKm').value);
+    formData.append('calculatedPrice', document.getElementById('calculatedPrice').innerText);
 
-            alert(translations[currentLang].alertSuccess);
+    alert(translations[currentLang].alertSuccess);
 
-            fetch(googleScriptUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify(bookingData)
-            })
-            .then(() => console.log("Sent successfully to Google Workspace."))
-            .catch(err => console.error("Error: ", err));
-        }
-
+    // الإرسال السلس إلى Apps Script
+    fetch(googleScriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+    })
+    .then(res => res.json())
+    .then(res => console.log("Success:", res))
+    .catch(err => console.error("Error:", err));
+}
         function updateWhatsappLink(event) {
             const name = document.getElementById('clientName').value;
             const phone = document.getElementById('clientPhone').value;
