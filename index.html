@@ -760,348 +760,259 @@
         <a href="https://wa.me/201008821115" id="waLink2" target="_blank"><i class="fab fa-whatsapp" style="color:#25d366;"></i> 🟢 <span id="waTxt2">خط حجز إضافي:</span> 01008821115</a>
     </div>
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
     <script>
+        // رابط الـ Google Apps Script الخاص بـ DT Limousine
+        const googleScriptUrl = "https://script.google.com/macros/s/AKfycbydLlpn02_bXvYxPOI3nTbiJf5saGJl3GdUaessP2VeMWRRPgqh7Y8IfcEagStdWGvb8A/exec";
+
         let currentLang = "ar";
-        let lastFormattedMsg = ""; 
-        
+
+        // نصوص الترجمة الخاصة بالموقع
         const translations = {
             ar: {
                 pageTitle: "DT Limousine | دي تي ليموزين",
-                navHome: "الرئيسية", navAbout: "من نحن", navServices: "خدماتنا", navCalc: "حساب التكلفة", navFleet: "أسطولنا",
-                heroTitle: "فخامة الالتزام.. ", heroSpan: "وأمان الطريق",
-                heroDesc: "خدمات ليموزين فاخرة وموثوقة من دمياط إلى جميع المطارات والمحافظات. نعتني بتفاصيل رحلتك لتستمتع براحة فائقة وأمان كامل وحجز مضمون.",
-                heroBtnMain: "احسب تكلفة رحلتك واحجز الآن", heroBtnSec: " حجز سريع مباشر واتساب",
-                trust1: "🛡️ رحلات آمنة ومؤمنة بالكامل", trust2: "⏱️ التزام تام بالمواعيد دقيقة بدقيقة", trust3: "✈️ تغطية شاملة لمطار القاهرة وبرج العرب",
-                aboutSub: "تاريخنا وقيمنا", aboutTitle: "دي تي ليموزين.. رائد الفخامة منذ 2008",
-                aboutContent: "منذ انطلاقتنا في عام 2008، التزمنا في دي تي ليموزين بتقديم مفهوم جديد لخدمات التنقل الفاخر والآمن في مصر. عبر ١٨ سنة من التفاني والاحترافية، أكملنا بنجاح أكثر من 50,000 رحلة، مع رصيد يفخر به من الثقة والرضا التام للعملاء.",
-                statLabel1: "تأسيس الشركة", statLabel2: "رحلة ناجحة ومكتملة", statLabel3: "سيارات نظيفة ومريحة",
-                servicesSub: "ماذا نقدم", servicesTitle: "خدماتنا المتميزة",
-                srvTitle1: "ليموزين المطارات", srvDesc1: "تغطية شاملة ودقيقة لمطار القاهرة الدولي ومطار برج العرب بسيارات مجهزة بشنط واسعة لضمان راحتك بعد الرحلة.",
-                srvTitle2: "السفر بين المحافظات", srvDesc2: "سافر بين دمياط وكافة محافظات الجمهورية بأعلى درجات الأمان والخصوصية مع سائقين محترفين عارفين كل الطرق.",
-                srvTitle3: "التنقل الداخلي", srvDesc3: "مشاويرك اليومية وتنقلاتك الخاصة داخل أي محافظة في مصر بسيارات حديثة ومكيفة تصلك أينما كنت وفي أي وقت.",
-                srvTitle4: "رجال الأعمال والشركات", srvDesc4: "تنقلات رسمية فاخرة تليق بنجاح أعمالك، مع الالتزام التام بأعلى معايير السرية، المواعيد، والاحترافية.",
-                srvBtn: "احسب سعر الرحلة ←",
-                calcSub: "حجز ذكي وفوري", calcTitle: "حساب تكلفة الرحلة أوتوماتيكياً",
-                lblClientName: "الاسم الكريم", phClientName: "أدخل اسمك بالكامل",
-                lblClientPhone: "رقم التليفون", phClientPhone: "رقم الموبايل",
-                lblClientEmail: "البريد الإلكتروني",
-                lblTripDate: "تاريخ الرحلة", lblTripTime: "وقت التحرك (الساعة)", lblTripRoute: "مسار الرحلة",
-                optRouteOneway: "اتجاه واحد (One Way)", optRouteRound: "ذهاب وعودة (2-Way)",
-                lblServiceType: "نوع الخدمة المطلوبة", optServiceDefault: "-- اختر نوع الخدمة --",
-                optServiceAirport: "ليموزين المطارات", optServiceIntercity: "السفر بين المحافظات", optServiceInternal: "التنقل الداخلي (داخل نفس المحافظة)", optServiceBusiness: "رجال الأعمال والشركات",
-                lblProvinceName: "حدد المحافظة المطلوبة", phProvinceName: "مثال: القاهرة، دمياط...",
-                lblRoadPreference: "تفضيل خط السير والمحاور", optRoadHigh: "طرق سريعة ممهدة ومحاور رئيسية (موصى به لسلامة السيارات)", optRoadShort: "أقصر مسار جيوغرافي (قد يشمل طرق فرعية أو مكسرة)",
-                lblCarCategory: "فئة السيارة المطلوبة", optCarDefault: "-- اختر فئة السيارة --",
-                optCarSedan: "سيدان حديثة (فيات تيبو / نيسان)", optCarSuv: "سيارة عائلية SUV (سوبارو / إكسباندر)", optCarHiace: "ميكروباص سياحي (تويوتا هاي آيس)",
-                lblPickup: "من (نقطة الانطلاق بالتفصيل)", phPickup: "مثال: دمياط، ميدان الساعة",
-                lblDropoff: "إلى (الوجهة / المطار / العنوان)", phDropoff: "مثال: مطار القاهرة الدولي صالة 3",
-                lblDistance: "المسافة الفعلية المعتمدة للرحلة (كيلومتر)", phDistance: "يتم احتسابها تلقائياً وتعديلها وفقاً لجودة الطريق",
-                btnCalcSubmit: "احسب السعر الحالي للرحلة", 
-                gatewayTitle: "اختر طريقة تأكيد الحجز المناسبة لك:", btnSubmitWeb: "🌐 حجز مباشر وإبلاغ الإدارة", submitToWhatsapp: " تأكيد وإرسال عبر الواتساب",
-                fleetSub: "اختر راحتك", fleetTitle: "أسطول سيارات DT المعتمد",
-                badgeSedan: "فئة السيدان", flTitle1: "السيارات السيدان الحديثة", flListTitle1: "السيارات المتاحة بالأسطول:",
-                flLi1_1: "فيات تيبو - أبيض (موديل 2020)", flLi1_2: "فيات تيبو - أبيض (موديل 2022)", flLi1_3: "نيسان صني - رمادي غامق (موديل 2021)", flLi1_4: "سوزوكي سياز - كحلي وأبيض (موديل 2022)",
-                flSpec1_1: "👥 4 ركاب", flSpec1_2: "🧳 3 شنط متوسطة",
-                badgeSuv: "فئة العائلية والـ SUV", flTitle2: "السيارات العائلية والـ SUV", flListTitle2: "السيارات المتاحة بالأسطول:",
-                flLi2_1: "سوبارو XV - أبيض", flLi2_2: "عدد 3 سيارات ميتسوبيشي إكسباندر - أبيض", flLi2_3: "DFSK Glory - أبيض",
-                flSpec2_1: "👥 5 - 7 ركاب", flSpec2_2: "🧳 5 شنط كبيرة",
-                badgeHiace: "فئة المجموعات والرحلات", flTitle3: "ميكروباص سياحي 14 راكب", flListTitle3: "الفئة المتاحة بالأسطول:",
-                flLi3_1: "تويوتا هاي آيس (Toyota Hiace) - أبيض (موديل 2022)", flSpec3_1: "👥 حتى 14 راكب", flSpec3_2: "🧳 سعة أمتعة ضخمة جداً",
-                ftTitle: "هل أنت مستعد لرحلتك القادمة؟", ftDesc: "اتصل بنا الآن أو تواصل معنا عبر الواتساب لتأكيد حجز سيارتك في دقائق معدودة.",
-                ftBtnWa1: " تواصل عبر واتساب (1)", ftBtnWa2: " تواصل عبر واتساب (2)",
-                waTxt1: "خط حجز رئيسي:", waTxt2: "خط حجز إضافي:",
-                alertDistance: "برجاء الانتظار حتى يتم حساب المسافة تلقائياً أو التأكد من كتابة اسم المدينة بوضوح.",
-                alertSuccess: "شكراً لك يا فندم.. تم تسجيل الحجز على الويبسايت وسيتم توجيه بيانات رحلتك فوراً لإخطار الأرقام الإدارية.",
-                priceEst: "السعر التقديري لرحلتك: "
+                heroTitle: "فخامة التنقل، أينما كنت",
+                heroSub: "خدمات ليموزين فاخرة وموثوقة على مدار الساعة في مصر",
+                bookNow: "احجز رحلتك الآن",
+                calcTitle: "حاسبة التكلفة الفورية",
+                lblPickup: "نقطة الانطلاق (المدينة/المكان):",
+                lblDropoff: "وجهة الوصول (المدينة/المكان):",
+                lblRoad: "تفضيل الطريق:",
+                optNormal: "طريق عادي / زراعي",
+                optHighway: "طرق سريعة ومحاور (أمان للعفشة)",
+                lblCar: "نوع السيارة المفضلة:",
+                optTipo: "فيات تيبو 2020 (سيدان مريحة)",
+                optHiace: "تويوتا هياص (فان عائلي سياحي)",
+                lblDist: "المسافة التقديرية (كم):",
+                phDist: "سيتم الحساب تلقائياً عند كتابة العناوين...",
+                btnCalc: "احسب التكلفة الفورية",
+                priceEst: "التكلفة التقديرية للرحلة: ",
+                egp: " جنيه مصري",
+                lblClientName: "اسم العميل بالكامل:",
+                lblClientPhone: "رقم الهاتف / الواتساب:",
+                btnSubmit: "تأكيد الحجز وإرسال البيانات",
+                alertSuccess: "تم استلام طلب حجزك بنجاح! سنتواصل معك فوراً لتأكيد الرحلة.",
+                alertError: "حدث خطأ أثناء الإرسال، يرجى المحاولة مرة أخرى.",
+                alertDistance: "يرجى إدخال نقطة الانطلاق والوصول أولاً ليتم الحساب تلقائياً."
             },
             en: {
-                pageTitle: "DT Limousine | Premium Services",
-                navHome: "Home", navAbout: "About Us", navServices: "Services", navCalc: "Calculator", navFleet: "Our Fleet",
-                heroTitle: "Luxury Commitment.. ", heroSpan: "Safe Travels",
-                heroDesc: "Premium and reliable limousine services from Damietta to all airports and governorates. We handle all journey details for ultimate comfort.",
-                heroBtnMain: "Calculate & Book Now", heroBtnSec: " Fast WhatsApp Booking",
-                trust1: "🛡️ Fully Secure & Insured Trips", trust2: "⏱️ Strict punctuality, minute by minute", trust3: "✈️ Complete Cairo & Borg El Arab Airport coverage",
-                aboutSub: "Our History & Values", aboutTitle: "DT Limousine.. Luxury Leader Since 2008",
-                aboutContent: "Since our launch in 2008, DT Limousine has committed to delivering a new standard of luxurious and safe transportation in Egypt. Over 18 years, we successfully completed more than 50,000 trips, with a proud record of trust and customer satisfaction.",
-                statLabel1: "Company Founded", statLabel2: "Successful Trips Done", statLabel3: "Clean & Comfortable Cars",
-                servicesSub: "What We Offer", servicesTitle: "Our Elite Services",
-                srvTitle1: "Airport Limousine", srvDesc1: "Punctual, full coverage of Cairo International and Borg El Arab airports with spacious luggage room for post-flight comfort.",
-                srvTitle2: "Intercity Travel", srvDesc2: "Travel securely between Damietta and all Egyptian governorates with highly skilled drivers who master all routes.",
-                srvTitle3: "Local Transport", srvDesc3: "Your daily trips and private commuting inside any city with modern, fully air-conditioned vehicles reaching you instantly.",
-                srvTitle4: "Business & Corporate", srvDesc4: "Official premium transportation tailored for corporate success with total confidentiality, accuracy, and professionalism.",
-                srvBtn: "Calculate Price ←",
-                calcSub: "Smart & Instant Booking", calcTitle: "Automated Price Calculator",
-                lblClientName: "Full Name", phClientName: "Enter your full name",
-                lblClientPhone: "Phone Number", phClientPhone: "Mobile number",
-                lblClientEmail: "Email Address",
-                lblTripDate: "Trip Date", lblTripTime: "Pickup Time", lblTripRoute: "Trip Route",
-                optRouteOneway: "One Way Trip", optRouteRound: "Round Trip (2-Way)",
-                lblServiceType: "Required Service Type", optServiceDefault: "-- Choose Service --",
-                optServiceAirport: "Airport Limousine", optServiceIntercity: "Intercity Travel", optServiceInternal: "Local Commute (Same Province)", optServiceBusiness: "Business & Corporate",
-                lblProvinceName: "Specify Province", phProvinceName: "e.g., Cairo, Damietta...",
-                lblRoadPreference: "Route & Highway Preference", optRoadHigh: "Paved Highways & Main Roads (Recommended for Car Safety)", optRoadShort: "Shortest Geographical Route (May include unpaved roads)",
-                lblCarCategory: "Required Car Category", optCarDefault: "-- Choose Car Category --",
-                optCarSedan: "Modern Sedan (Fiat Tipo / Nissan)", optCarSuv: "Family SUV (Subaru / Xpander)", optCarHiace: "Tour Bus Minivan (Toyota Hiace)",
-                lblPickup: "From (Detailed Pickup Point)", phPickup: "e.g., Damietta, El Sa'aa Square",
-                lblDropoff: "To (Destination/Airport/Address)", phDropoff: "e.g., Cairo Airport Terminal 3",
-                lblDistance: "Approved Trip Distance (KM)", phDistance: "Automatically calculated and optimized based on road preference...",
-                btnCalcSubmit: "Calculate Trip Price", 
-                gatewayTitle: "Choose your preferred confirmation gateway:", btnSubmitWeb: "🌐 Save & Notify Admins", submitToWhatsapp: " Confirm via WhatsApp",
-                fleetSub: "Choose Your Comfort", fleetTitle: "DT Approved Fleet Lineup",
-                badgeSedan: "Sedan Class", flTitle1: "Modern Sedan Vehicles", flListTitle1: "Available Vehicles in Fleet:",
-                flLi1_1: "Fiat Tipo - White (2020 Model)", flLi1_2: "Fiat Tipo - White (2022 Model)", flLi1_3: "Nissan Sunny - Dark Grey (2021 Model)", flLi1_4: "Suzuki Ciaz - Navy & White (2022 Model)",
-                flSpec1_1: "👥 4 Passengers", flSpec1_2: "🧳 3 Medium Bags",
-                badgeSuv: "Family & SUV Class", flTitle2: "Family & SUV Vehicles", flListTitle2: "Available Vehicles in Fleet:",
-                flLi2_1: "Subaru XV - White", flLi2_2: "3x Mitsubishi Xpander - White", flLi2_3: "DFSK Glory - White",
-                flSpec2_1: "👥 5 - 7 Passengers", flSpec2_2: "🧳 5 Large Bags",
-                badgeHiace: "Groups & Tours Class", flTitle3: "14-Passenger Tour Bus", flListTitle3: "Available Fleet Category:",
-                flLi3_1: "Toyota Hiace Van - White (2022 Model)", flSpec3_1: "👥 Up to 14 Passengers", flSpec3_2: "🧳 Huge Luggage Capacity",
-                ftTitle: "Ready For Your Next Journey?", ftDesc: "Call us right away or get in touch via WhatsApp to confirm your car booking in minutes.",
-                ftBtnWa1: " Contact WhatsApp (1)", ftBtnWa2: " Contact WhatsApp (2)",
-                waTxt1: "Main Booking Line:", waTxt2: "Additional Line:",
-                alertDistance: "Please wait for the distance to be auto-calculated, or ensure city names are typed clearly.",
-                alertSuccess: "Thank you! Your booking is saved on the website. To ensure instant coordination, your journey details will now be forwarded to DT Limousine admin lines.",
-                priceEst: "Estimated Trip Price: "
+                pageTitle: "DT Limousine | Luxury Services",
+                heroTitle: "Luxury Mobility, Wherever You Are",
+                heroSub: "Premium & Reliable Limousine Services 24/7 in Egypt",
+                bookNow: "Book Your Ride Now",
+                calcTitle: "Instant Fare Calculator",
+                lblPickup: "Pickup Point (City/Location):",
+                lblDropoff: "Drop-off Destination (City/Location):",
+                lblRoad: "Road Preference:",
+                optNormal: "Standard / Agricultural Route",
+                optHighway: "Highways & Expressways (Smooth Ride)",
+                lblCar: "Preferred Car Type:",
+                optTipo: "Fiat Tipo 2020 (Comfortable Sedan)",
+                optHiace: "Toyota Hiace (Family Tour Van)",
+                lblDist: "Estimated Distance (Km):",
+                phDist: "Calculated automatically from addresses...",
+                btnCalc: "Calculate Fare Instantly",
+                priceEst: "Estimated Trip Fare: ",
+                egp: " EGP",
+                lblClientName: "Full Name:",
+                lblClientPhone: "Phone / WhatsApp Number:",
+                btnSubmit: "Confirm Booking & Send Data",
+                alertSuccess: "Your booking request received successfully! We will contact you shortly.",
+                alertError: "An error occurred, please try again.",
+                alertDistance: "Please enter pickup and drop-off points first for auto-calculation."
             }
         };
 
+        // تفعيل حساب المسافة التلقائي بمجرد الكتابة والتحرك من المربعات
+        document.addEventListener("DOMContentLoaded", function() {
+            const pickupInput = document.getElementById('pickupPoint');
+            const dropoffInput = document.getElementById('dropoffPoint');
+            const roadInput = document.getElementById('roadPreference');
+            const carInput = document.getElementById('carType');
+            const distInput = document.getElementById('distanceKm');
+
+            if(pickupInput) pickupInput.addEventListener('blur', autoCalculateDistance);
+            if(dropoffInput) dropoffInput.addEventListener('blur', autoCalculateDistance);
+            if(roadInput) roadInput.addEventListener('change', autoCalculateDistance);
+            if(carInput) carInput.addEventListener('change', calculatePriceImmediately);
+            
+            if(distInput) distInput.addEventListener('input', calculatePriceImmediately);
+
+            // منع الزرار من عمل ريفريش وتشغيل الحساب الذكي
+            const calcBtn = document.querySelector('button[onclick="handleCalculation(event)"]');
+            if(calcBtn) {
+                calcBtn.removeAttribute('onclick');
+                calcBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    autoCalculateDistance();
+                });
+            }
+        });
+
+        // دالة جلب المسافة الحقيقية عبر الخرائط وسيرفرات الطرق في مصر
+        async function autoCalculateDistance() {
+            const pickup = document.getElementById('pickupPoint').value;
+            const dropoff = document.getElementById('dropoffPoint').value;
+            const roadPref = document.getElementById('roadPreference').value;
+            const distanceInput = document.getElementById('distanceKm');
+
+            if (!pickup || !dropoff) return;
+
+            distanceInput.value = ""; 
+            distanceInput.placeholder = currentLang === "ar" ? "جاري حساب مسار الطريق بدقة..." : "Calculating highway route...";
+
+            try {
+                // البحث عن إحداثيات نقطة الانطلاق والوصول في مصر
+                const resPickup = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pickup + ' Egypt')}&email=kamalhamza1984@gmail.com`);
+                const dataPickup = await resPickup.json();
+
+                const resDropoff = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dropoff + ' Egypt')}&email=kamalhamza1984@gmail.com`);
+                const dataDropoff = await resDropoff.json();
+
+                if (dataPickup.length === 0 || dataDropoff.length === 0) {
+                    distanceInput.placeholder = currentLang === "ar" ? "اكتب اسم المدينة بوضوح (مثال: دمياط)" : "Type city name clearly.";
+                    return;
+                }
+
+                const lat1 = dataPickup[0].lat; const lon1 = dataPickup[0].lon;
+                const lat2 = dataDropoff[0].lat; const lon2 = dataDropoff[0].lon;
+
+                // جلب مسار القيادة الفعلي عبر الطرق من سيرفر OSRM الدولي
+                const resRoute = await fetch(`https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=false`);
+                const dataRoute = await resRoute.json();
+
+                if (dataRoute.routes && dataRoute.routes.length > 0) {
+                    let distanceInKm = Math.round(dataRoute.routes[0].distance / 1000);
+                    // معامل أمان 18% لو اختار طرق حرة ومحاور سريعة
+                    if (roadPref === 'highway') {
+                        distanceInKm = Math.round(distanceInKm * 1.18);
+                    }
+                    distanceInput.value = distanceInKm;
+                } else {
+                    // حساب المسافة المستقيمة في حال تهنيج السيرفر كخيار احتياطي
+                    const R = 6371; 
+                    const dLat = (lat2 - lat1) * Math.PI / 180;
+                    const dLon = (lon2 - lon1) * Math.PI / 180;
+                    const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                    const directDist = R * c;
+                    distanceInput.value = Math.round(directDist * (roadPref === 'highway' ? 1.35 : 1.20));
+                }
+                
+                calculatePriceImmediately();
+                
+            } catch (error) {
+                console.error(error);
+                distanceInput.placeholder = currentLang === "ar" ? "أدخل الكيلومترات يدوياً" : "Enter distance manually";
+            }
+        }
+
+        // دالة حساب السعر الفوري الفعلي بناءً على نوع السيارة
+        function calculatePriceImmediately() {
+            const distance = parseFloat(document.getElementById('distanceKm').value);
+            const carType = document.getElementById('carType').value;
+            const resultBox = document.getElementById('resultBox');
+            const priceText = document.getElementById('calculatedPrice');
+
+            if (!distance || isNaN(distance)) {
+                if(resultBox) resultBox.style.display = 'none';
+                return;
+            }
+
+            // تسعيرة الكيلومتر المعتمدة لسيارات DT Limousine
+            let ratePerKm = 6; 
+            if (carType === 'tipo') ratePerKm = 7;     // فيات تيبو
+            if (carType === 'hiace') ratePerKm = 10;   // تويوتا هياص فان عائلي
+
+            let totalPrice = distance * ratePerKm;
+            if (totalPrice < 150) totalPrice = 150; // الحد الأدنى لأي تحرك
+
+            if(priceText && resultBox) {
+                priceText.innerText = translations[currentLang].priceEst + Math.round(totalPrice) + translations[currentLang].egp;
+                resultBox.style.display = 'block';
+            }
+        }
+
+        // دالة تأكيد الحجز وإرسال البيانات للجوجل شيت بدون فتح نوافذ جديدة منبثقة
+        function handleBooking(event) {
+            if(event) event.preventDefault();
+
+            const name = document.getElementById('clientName').value;
+            const phone = document.getElementById('clientPhone').value;
+            if(!name || !phone) {
+                alert(currentLang === "ar" ? "برجاء ملء الاسم ورقم الهاتف أولاً لتأكيد الحجز." : "Please fill name and phone.");
+                return;
+            }
+
+            const bookingData = {
+                clientName: name,
+                clientPhone: phone,
+                pickupPoint: document.getElementById('pickupPoint').value,
+                dropoffPoint: document.getElementById('dropoffPoint').value,
+                distance: document.getElementById('distanceKm').value,
+                calculatedPrice: document.getElementById('calculatedPrice').innerText
+            };
+
+            // إظهار رسالة النجاح الفورية للعميل لراحة البال
+            alert(translations[currentLang].alertSuccess);
+
+            // الإرسال السري في الخلفية إلى Google Sheets
+            fetch(googleScriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(bookingData)
+            })
+            .then(() => console.log("Sent successfully to Google Workspace."))
+            .catch(err => console.error("Network Error: ", err));
+            
+            // تحديث رابط الواتساب العائم كدعم احتياطي سريع بالبيانات
+            const whatsappFloat = document.querySelector('.whatsapp-float');
+            if(whatsappFloat) {
+                const text = encodeURIComponent(`طلب حجز ليموزين جديد:\nالاسم: ${name}\nالهاتف: ${phone}\nمن: ${bookingData.pickupPoint}\nإلى: ${bookingData.dropoffPoint}\nالمسافة: ${bookingData.distance} كم\nالسعر: ${bookingData.calculatedPrice}`);
+                whatsappFloat.href = `https://wa.me/201008821115?text=${text}`; // الرقم المعتمد للمبيعات
+            }
+        }
+
+        // دالة تحويل لغة الموقع كاملة (عربي / إنجليزي) تلبية لطلبك
         function toggleLanguage() {
             currentLang = currentLang === "ar" ? "en" : "ar";
-            const btn = document.getElementById("langToggleBtn");
-            const html = document.getElementById("htmlTag");
-
+            const htmlTag = document.getElementById('htmlTag');
+            
             if (currentLang === "en") {
-                html.setAttribute("dir", "ltr");
-                html.setAttribute("lang", "en");
-                btn.innerText = "العربية";
+                htmlTag.setAttribute('lang', 'en');
+                htmlTag.setAttribute('dir', 'ltr');
+                document.getElementById('langBtn').innerText = "العربية";
             } else {
-                html.setAttribute("dir", "rtl");
-                html.setAttribute("lang", "ar");
-                btn.innerText = "English";
+                htmlTag.setAttribute('lang', 'ar');
+                htmlTag.setAttribute('dir', 'rtl');
+                document.getElementById('langBtn').innerText = "English";
             }
 
-            document.getElementById("pageTitle").innerText = translations[currentLang].pageTitle;
-            document.getElementById("navHome").innerText = translations[currentLang].navHome;
-            document.getElementById("navAbout").innerText = translations[currentLang].navAbout;
-            document.getElementById("navServices").innerText = translations[currentLang].navServices;
-            document.getElementById("navCalc").innerText = translations[currentLang].navCalc;
-            document.getElementById("navFleet").innerText = translations[currentLang].navFleet;
-            document.getElementById("heroTitle").firstChild.textContent = translations[currentLang].heroTitle;
-            document.getElementById("heroSpan").innerText = translations[currentLang].heroSpan;
-            document.getElementById("heroDesc").innerText = translations[currentLang].heroDesc;
-            document.getElementById("heroBtnMain").innerText = translations[currentLang].heroBtnMain;
-            document.getElementById("heroBtnSec").innerHTML = `<i class="fab fa-whatsapp"></i> ` + translations[currentLang].heroBtnSec;
-            document.getElementById("trust1").innerText = translations[currentLang].trust1;
-            document.getElementById("trust2").innerText = translations[currentLang].trust2;
-            document.getElementById("trust3").innerText = translations[currentLang].trust3;
-            document.getElementById("aboutSub").innerText = translations[currentLang].aboutSub;
-            document.getElementById("aboutTitle").innerText = translations[currentLang].aboutTitle;
-            document.getElementById("aboutContent").innerText = translations[currentLang].aboutContent;
-            document.getElementById("statLabel1").innerText = translations[currentLang].statLabel1;
-            document.getElementById("statLabel2").innerText = translations[currentLang].statLabel2;
-            document.getElementById("statLabel3").innerText = translations[currentLang].statLabel3;
-            document.getElementById("servicesSub").innerText = translations[currentLang].servicesSub;
-            document.getElementById("servicesTitle").innerText = translations[currentLang].servicesTitle;
-            document.getElementById("srvTitle1").innerText = translations[currentLang].srvTitle1;
-            document.getElementById("srvDesc1").innerText = translations[currentLang].srvDesc1;
-            document.getElementById("srvTitle2").innerText = translations[currentLang].srvTitle2;
-            document.getElementById("srvDesc2").innerText = translations[currentLang].srvDesc2;
-            document.getElementById("srvTitle3").innerText = translations[currentLang].srvTitle3;
-            document.getElementById("srvDesc3").innerText = translations[currentLang].srvDesc3;
-            document.getElementById("srvTitle4").innerText = translations[currentLang].srvTitle4;
-            document.getElementById("srvDesc4").innerText = translations[currentLang].srvDesc4;
+            // تحديث النصوص في الواجهة
+            document.getElementById('pageTitle').innerText = translations[currentLang].pageTitle;
+            document.querySelector('.hero h1').innerText = translations[currentLang].heroTitle;
+            document.querySelector('.hero p').innerText = translations[currentLang].heroSub;
+            document.querySelector('.cta-btn').innerText = translations[currentLang].bookNow;
+            document.querySelector('.calculator-card h2').innerText = translations[currentLang].calcTitle;
             
-            for(let i=1; i<=4; i++) {
-                document.getElementById("srvBtn" + i).innerText = translations[currentLang].srvBtn;
-            }
+            // تحديث عناوين حقول الإدخال
+            document.querySelectorAll('.form-group label')[0].innerText = translations[currentLang].lblPickup;
+            document.querySelectorAll('.form-group label')[1].innerText = translations[currentLang].lblDropoff;
+            document.querySelectorAll('.form-group label')[2].innerText = translations[currentLang].lblRoad;
+            document.querySelectorAll('.form-group label')[3].innerText = translations[currentLang].lblCar;
+            document.querySelectorAll('.form-group label')[4].innerText = translations[currentLang].lblDist;
+            document.querySelectorAll('.form-group label')[5].innerText = translations[currentLang].lblClientName;
+            document.querySelectorAll('.form-group label')[6].innerText = translations[currentLang].lblClientPhone;
 
-            document.getElementById("calcSub").innerText = translations[currentLang].calcSub;
-            document.getElementById("calcTitle").innerText = translations[currentLang].calcTitle;
-            document.getElementById("lblClientName").innerText = translations[currentLang].lblClientName;
-            document.getElementById("clientName").placeholder = translations[currentLang].phClientName;
-            document.getElementById("lblClientPhone").innerText = translations[currentLang].lblClientPhone;
-            document.getElementById("clientPhone").placeholder = translations[currentLang].phClientPhone;
-            document.getElementById("lblClientEmail").innerText = translations[currentLang].lblClientEmail;
-            document.getElementById("lblTripDate").innerText = translations[currentLang].lblTripDate;
-            document.getElementById("lblTripTime").innerText = translations[currentLang].lblTripTime;
-            document.getElementById("lblTripRoute").innerText = translations[currentLang].lblTripRoute;
-            document.getElementById("optRouteOneway").innerText = translations[currentLang].optRouteOneway;
-            document.getElementById("optRouteRound").innerText = translations[currentLang].optRouteRound;
-            document.getElementById("lblServiceType").innerText = translations[currentLang].lblServiceType;
-            document.getElementById("optServiceDefault").innerText = translations[currentLang].optServiceDefault;
-            document.getElementById("optServiceAirport").innerText = translations[currentLang].optServiceAirport;
-            document.getElementById("optServiceIntercity").innerText = translations[currentLang].optServiceIntercity;
-            document.getElementById("optServiceInternal").innerText = translations[currentLang].optServiceInternal;
-            document.getElementById("optServiceBusiness").innerText = translations[currentLang].optServiceBusiness;
-            document.getElementById("lblProvinceName").innerText = translations[currentLang].lblProvinceName;
-            document.getElementById("provinceName").placeholder = translations[currentLang].phProvinceName;
-            document.getElementById("lblRoadPreference").innerText = translations[currentLang].lblRoadPreference;
-            document.getElementById("optRoadHigh").innerText = translations[currentLang].optRoadHigh;
-            document.getElementById("optRoadShort").innerText = translations[currentLang].optRoadShort;
-            document.getElementById("lblCarCategory").innerText = translations[currentLang].lblCarCategory;
-            document.getElementById("optCarDefault").innerText = translations[currentLang].optCarDefault;
-            document.getElementById("optCarSedan").innerText = translations[currentLang].optCarSedan;
-            document.getElementById("optCarSuv").innerText = translations[currentLang].optCarSuv;
-            document.getElementById("optCarHiace").innerText = translations[currentLang].optCarHiace;
-            document.getElementById("lblPickup").innerText = translations[currentLang].lblPickup;
-            document.getElementById("pickupPoint").placeholder = translations[currentLang].phPickup;
-            document.getElementById("lblDropoff").innerText = translations[currentLang].lblDropoff;
-            document.getElementById("dropoffPoint").placeholder = translations[currentLang].phDropoff;
-            document.getElementById("lblDistance").innerText = translations[currentLang].lblDistance;
-            document.getElementById("distanceKm").placeholder = translations[currentLang].phDistance;
-            document.getElementById("btnCalcSubmit").innerText = translations[currentLang].btnCalcSubmit;
-            document.getElementById("gatewayTitle").innerText = translations[currentLang].gatewayTitle;
-            document.getElementById("btnSubmitWeb").innerText = translations[currentLang].btnSubmitWeb;
-            document.getElementById("submitToWhatsapp").innerHTML = `<i class="fab fa-whatsapp"></i> ` + translations[currentLang].submitToWhatsapp;
-            document.getElementById("fleetSub").innerText = translations[currentLang].fleetSub;
-            document.getElementById("fleetTitle").innerText = translations[currentLang].fleetTitle;
-            document.getElementById("badgeSedan").innerText = translations[currentLang].badgeSedan;
-            document.getElementById("flTitle1").innerText = translations[currentLang].flTitle1;
-            document.getElementById("flListTitle1").innerText = translations[currentLang].flListTitle1;
-            document.getElementById("flLi1_1").innerText = translations[currentLang].flLi1_1;
-            document.getElementById("flLi1_2").innerText = translations[currentLang].flLi1_2;
-            document.getElementById("flLi1_3").innerText = translations[currentLang].flLi1_3;
-            document.getElementById("flLi1_4").innerText = translations[currentLang].flLi1_4;
-            document.getElementById("flSpec1_1").innerText = currentLang === "ar" ? "👥 4 ركاب" : "👥 4 Passengers";
-            document.getElementById("flSpec1_2").innerText = currentLang === "ar" ? "🧳 3 شنط متوسطة" : "🧳 3 Medium Bags";
-            document.getElementById("badgeSuv").innerText = translations[currentLang].badgeSuv;
-            document.getElementById("flTitle2").innerText = translations[currentLang].flTitle2;
-            document.getElementById("flListTitle2").innerText = translations[currentLang].flListTitle2;
-            document.getElementById("flLi2_1").innerText = translations[currentLang].flLi2_1;
-            document.getElementById("flLi2_2").innerText = translations[currentLang].flLi2_2;
-            document.getElementById("flLi2_3").innerText = translations[currentLang].flLi2_3;
-            document.getElementById("flSpec2_1").innerText = currentLang === "ar" ? "👥 5 - 7 ركاب" : "👥 5 - 7 Passengers";
-            document.getElementById("flSpec2_2").innerText = currentLang === "ar" ? "🧳 5 شنط كبيرة" : "🧳 5 Large Bags";
-            document.getElementById("badgeHiace").innerText = translations[currentLang].badgeHiace;
-            document.getElementById("flTitle3").innerText = translations[currentLang].flTitle3;
-            document.getElementById("flListTitle3").innerText = translations[currentLang].flListTitle3;
-            document.getElementById("flLi3_1").innerText = translations[currentLang].flLi3_1;
-            document.getElementById("flSpec3_1").innerText = currentLang === "ar" ? "👥 حتى 14 راكب" : "👥 Up to 14 Passengers";
-            document.getElementById("flSpec3_2").innerText = currentLang === "ar" ? "🧳 سعة أمتعة ضخمة جداً" : "🧳 Huge Luggage Capacity";
-            document.getElementById("ftTitle").innerText = translations[currentLang].ftTitle;
-            document.getElementById("ftDesc").innerText = translations[currentLang].ftDesc;
-            document.getElementById("ftBtnWa1").innerHTML = `<i class="fab fa-whatsapp"></i> ` + translations[currentLang].ftBtnWa1;
-            document.getElementById("ftBtnWa2").innerHTML = `<i class="fab fa-whatsapp"></i> ` + translations[currentLang].ftBtnWa2;
-            document.getElementById("waTxt1").innerText = translations[currentLang].waTxt1;
-            document.getElementById("waTxt2").innerText = translations[currentLang].waTxt2;
-        }
-
-        const map = L.map('hiddenMapp').setView([30.0444, 31.2357], 6);
-
-        function setServiceType(serviceVal) {
-            document.getElementById('serviceType').value = serviceVal;
-            toggleProvinceField();
-        }
-
-        function toggleWhatsAppMenu() {
-            document.getElementById("waMenu").classList.toggle("show");
-        }
-
-        function toggleProvinceField() {
-            const serviceType = document.getElementById('serviceType').value;
-            const provinceGroup = document.getElementById('provinceGroup');
-            provinceGroup.style.display = serviceType === 'intercity' || serviceType === 'internal' ? 'flex' : 'none';
-        }
-
-        async function autoCalculateDistance() {
-    const pickup = document.getElementById('pickupPoint').value;
-    const dropoff = document.getElementById('dropoffPoint').value;
-    const roadPref = document.getElementById('roadPreference').value;
-    const distanceInput = document.getElementById('distanceKm');
-
-    if (!pickup || !dropoff) return;
-
-    distanceInput.value = ""; 
-    distanceInput.placeholder = currentLang === "ar" ? "جاري حساب مسار الطريق..." : "Calculating route...";
-
-    try {
-        const resPickup = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(pickup + ' Egypt')}&email=kamalhamza1984@gmail.com`);
-        const dataPickup = await resPickup.json();
-
-        const resDropoff = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(dropoff + ' Egypt')}&email=kamalhamza1984@gmail.com`);
-        const dataDropoff = await resDropoff.json();
-
-        if (dataPickup.length === 0 || dataDropoff.length === 0) {
-            distanceInput.placeholder = currentLang === "ar" ? "لم نتمكن من تحديد العنوان" : "Could not identify addresses.";
-            return;
-        }
-
-        const lat1 = dataPickup[0].lat; const lon1 = dataPickup[0].lon;
-        const lat2 = dataDropoff[0].lat; const lon2 = dataDropoff[0].lon;
-
-        const resRoute = await fetch(`https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=false`);
-        const dataRoute = await resRoute.json();
-
-        if (dataRoute.routes && dataRoute.routes.length > 0) {
-            let distanceInKm = Math.round(dataRoute.routes[0].distance / 1000);
-            if (roadPref === 'highway') {
-                distanceInKm = Math.round(distanceInKm * 1.18); // معامل أمان للطرق السريعة والمحاور
-            }
-            distanceInput.value = distanceInKm;
-        } else {
-            const R = 6371; 
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            distanceInput.value = Math.round(R * c * (roadPref === 'highway' ? 1.35 : 1.20));
-        }
-        
-        // تشغيل الحساب الفوري للسعر بناءً على الكيلومترات الجديدة ونوع السيارة
-        calculatePriceImmediately();
-        
-    } catch (error) {
-        console.error(error);
-        distanceInput.placeholder = currentLang === "ar" ? "اكتب المسافة يدوياً" : "Type distance manually";
-    }
-}
-
-function calculatePriceImmediately() {
-    const distance = parseFloat(document.getElementById('distanceKm').value);
-    const carType = document.getElementById('carType').value;
-    const resultBox = document.getElementById('resultBox');
-    const priceText = document.getElementById('calculatedPrice');
-
-    if (!distance || isNaN(distance)) return;
-
-    // تسعير الكيلو لكل عربية (تقريبي وتقدر تعدله براحتك)
-    let ratePerKm = 6; // السعر الافتراضي
-    if (carType === 'tipo') ratePerKm = 7;     // فيات تيبو
-    if (carType === 'hiace') ratePerKm = 10;   // تويوتا هياص فان
-
-    let totalPrice = distance * ratePerKm;
-    
-    // حد أدنى لأي رحلة لضمان تغطية مصاريف التحرك والبنزين
-    if (totalPrice < 150) totalPrice = 150; 
-
-    priceText.innerText = (currentLang === "ar" ? "السعر التقديري: " : "Estimated Price: ") + Math.round(totalPrice) + (currentLang === "ar" ? " جنيه مصري" : " EGP");
-    resultBox.style.display = 'block';
-}
-
-// ربط دالة الحساب بالزر وزر الإرسال
-function handleCalculation(event) {
-    event.preventDefault();
-    autoCalculateDistance();
-}
+            document.getElementById('distanceKm').placeholder = translations[currentLang].phDist;
+            document.querySelector('.submit-btn').innerText = translations[currentLang].btnSubmit;
             
-            const wa1 = document.getElementById('submitToWhatsapp');
-            wa1.href = `https://wa.me/201002820186?text=حجز ليموزين: ${document.getElementById('clientName').value}`;
+            calculatePriceImmediately();
         }
-
-        function submitToWebsite() {
-            alert(translations[currentLang].alertSuccess);
-        }// تشغيل الحساب التلقائي بمجرد الكتابة والتحرك من مربعات الانطلاق والوصول أو تغيير السيارة
-document.addEventListener("DOMContentLoaded", function() {
-    const pickupInput = document.getElementById('pickupPoint');
-    const dropoffInput = document.getElementById('dropoffPoint');
-    const roadInput = document.getElementById('roadPreference');
-    const carInput = document.getElementById('carType');
-
-    if(pickupInput) pickupInput.addEventListener('blur', autoCalculateDistance);
-    if(dropoffInput) dropoffInput.addEventListener('blur', autoCalculateDistance);
-    if(roadInput) roadInput.addEventListener('change', autoCalculateDistance);
-    if(carInput) carInput.addEventListener('change', calculatePriceImmediately);
-});
     </script>
 </body>
 </html>
