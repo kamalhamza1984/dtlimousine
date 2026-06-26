@@ -1090,7 +1090,18 @@ function handleCalculation(event) {
 
         function submitToWebsite() {
             alert(translations[currentLang].alertSuccess);
-        }
+        }// تشغيل الحساب التلقائي بمجرد الكتابة والتحرك من مربعات الانطلاق والوصول أو تغيير السيارة
+document.addEventListener("DOMContentLoaded", function() {
+    const pickupInput = document.getElementById('pickupPoint');
+    const dropoffInput = document.getElementById('dropoffPoint');
+    const roadInput = document.getElementById('roadPreference');
+    const carInput = document.getElementById('carType');
+
+    if(pickupInput) pickupInput.addEventListener('blur', autoCalculateDistance);
+    if(dropoffInput) dropoffInput.addEventListener('blur', autoCalculateDistance);
+    if(roadInput) roadInput.addEventListener('change', autoCalculateDistance);
+    if(carInput) carInput.addEventListener('change', calculatePriceImmediately);
+});
     </script>
 </body>
 </html>
