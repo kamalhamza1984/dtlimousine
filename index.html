@@ -920,10 +920,10 @@
             }
 
             // تسعيرة الكيلومتر المعتمدة لكل فئة
-            let ratePerKm = 6; 
-            if (carCategory === 'sedan') ratePerKm = 7;     // تيبو / نيسان
-            if (carCategory === 'suv') ratePerKm = 8.5;     // سوبارو / اكسباندر
-            if (carCategory === 'hiace') ratePerKm = 11;    // تويوتا هاي آيس
+            let ratePerKm = 10; 
+            if (carCategory === 'sedan') ratePerKm = 12;     // تيبو / نيسان
+            if (carCategory === 'suv') ratePerKm = 15;     // سوبارو / اكسباندر
+            if (carCategory === 'hiace') ratePerKm = 20;    // تويوتا هاي آيس
 
             let totalPrice = distance * ratePerKm;
 
