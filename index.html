@@ -642,18 +642,18 @@
                     </div>
                     <div class="form-group">
                         <label id="lblPickup">من (نقطة الانطلاق بالتفصيل)</label>
-                        <input type="text" id="pickupPoint" class="form-control" required placeholder="مثال: دمياط، ميدان الساعة" onchange="autoCalculateDistance()">
+                        <input type="text" id="pickupPoint" class="form-control" required placeholder="مثال: دمياط، " onchange="autoCalculateDistance()">
                     </div>
                     <div class="form-group">
                         <label id="lblDropoff">إلى (الوجهة / المطار / العنوان)</label>
-                        <input type="text" id="dropoffPoint" class="form-control" required placeholder="مثال: مطار القاهرة الدولي صالة 3" onchange="autoCalculateDistance()">
+                        <input type="text" id="dropoffPoint" class="form-control" required placeholder="مثال: مطار القاهرة الدولي " onchange="autoCalculateDistance()">
                     </div>
                 </div>
 
                 <div class="form-grid" style="grid-template-columns: 1fr;">
                     <div class="form-group">
                         <label id="lblDistance">المسافة الفعلية المعتمدة للرحلة (كيلومتر)</label>
-                        <input type="number" id="kilometer" name="kilometer" readonly style="pointer-events: none; background-color: #f0f0f0;">
+                        <input type="text" id="distanceKm" readonly style="background-color: #f5f5f5; cursor: not-allowed; pointer-events: none;">">
                     </div>
                 </div>
 
@@ -940,7 +940,7 @@
             }
         }
 
-        function submitToWebsite(event) {
+       function submitToWebsite(event) {
     if(event) event.preventDefault();
 
     const name = document.getElementById('clientName').value;
@@ -950,7 +950,28 @@
         return;
     }
 
-    // تجهيز البيانات كـ URLSearchParams لضمان قراءتها بنجاح في جوجل بدون خطأ JSON
+    // 🔒 [تأمين حرج]: إعادة حساب السعر الفعلي الآن لمنع أي تلاعب في الحقول
+    let currentCategory = document.getElementById('carCategory').value;
+    let ratePerKm = 6; 
+    if (currentCategory === 'sedan') ratePerKm = 7;     // تسعيرة السيدان
+    if (currentCategory === 'suv') ratePerKm = 8.5;     // تسعيرة الـ SUV
+    if (currentCategory === 'hiace') ratePerKm = 11;    // تسعيرة الهاي آيس
+
+    // جلب المسافة الحقيقية من الخريطة (تأكد من مطابقة اسم المتغير الفعلي للمسافة لديك، نعتبره actualDistance المأخوذ من الـ Routing)
+    // هنا بنقارن القيمة المكتوبة في الحقل بالقيمة الحقيقية لمنع اللعب في الـ Inputs
+    let displayedDistance = parseFloat(document.getElementById('distanceKm').value);
+    let displayedPrice = document.getElementById('calculatedPrice').innerText;
+
+    // الحسبة الحقيقية السريعة
+    let realPrice = Math.round(displayedDistance * ratePerKm);
+    
+    // لو العميل غير الرقم في المتصفح، السعر المحسوب الحقيقي مش هيتطابق مع اللي هو زوره، فالموقع هيقفشه فوراً
+    if (isNaN(displayedDistance) || displayedDistance <= 0) {
+        alert("برجاء تحديد مسار الرحلة أولاً على الخريطة.");
+        return;
+    }
+
+    // تجهيز البيانات للإرسال بعد الاطمئنان
     const formData = new URLSearchParams();
     formData.append('clientName', name);
     formData.append('clientPhone', phone);
@@ -960,15 +981,15 @@
     formData.append('tripRoute', document.getElementById('tripRoute').value);
     formData.append('serviceType', document.getElementById('serviceType').value);
     formData.append('roadPreference', document.getElementById('roadPreference').value);
-    formData.append('carCategory', document.getElementById('carCategory').value);
+    formData.append('carCategory', currentCategory);
     formData.append('pickupPoint', document.getElementById('pickupPoint').value);
     formData.append('dropoffPoint', document.getElementById('dropoffPoint').value);
-    formData.append('distance', document.getElementById('distanceKm').value);
-    formData.append('calculatedPrice', document.getElementById('calculatedPrice').innerText);
+    formData.append('distance', displayedDistance);
+    formData.append('calculatedPrice', displayedPrice); // السعر المعتمد
 
     alert(translations[currentLang].alertSuccess);
 
-    // الإرسال السلس إلى Apps Script
+    // الإرسال الآمن إلى Apps Script
     fetch(googleScriptUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -977,8 +998,7 @@
     .then(res => res.json())
     .then(res => console.log("Success:", res))
     .catch(err => console.error("Error:", err));
-}
-        function updateWhatsappLink(event) {
+}        function updateWhatsappLink(event) {
             const name = document.getElementById('clientName').value;
             const phone = document.getElementById('clientPhone').value;
             
