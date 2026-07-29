@@ -1217,15 +1217,15 @@
                 return;
             }
 
-            let ratePerKm = 13; 
-            if (carCategory === 'sedan') ratePerKm = 13;     
-            if (carCategory === 'suv') ratePerKm = 16;     
-            if (carCategory === 'hiace') ratePerKm = 20;    
+            let ratePerKm = 12; 
+            if (carCategory === 'sedan') ratePerKm = 12;     
+            if (carCategory === 'suv') ratePerKm = 15;     
+            if (carCategory === 'hiace') ratePerKm = 19;    
 
             let totalPrice = distance * ratePerKm;
 
             if (tripRoute === 'roundtrip') {
-                totalPrice = totalPrice * 1.4; 
+                totalPrice = totalPrice * 1.3; 
             }
 
             if (totalPrice < 150) totalPrice = 150; 
