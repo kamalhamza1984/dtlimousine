@@ -1206,35 +1206,66 @@
         }
 
         function calculatePriceImmediately() {
-            const distance = parseFloat(document.getElementById('distanceKm').value);
-            const carCategory = document.getElementById('carCategory').value;
-            const tripRoute = document.getElementById('tripRoute').value;
-            const resultBox = document.getElementById('resultBox');
-            const priceText = document.getElementById('calculatedPrice');
+    const distance = parseFloat(document.getElementById('distanceKm').value);
+    const carCategory = document.getElementById('carCategory').value;
+    const tripRoute = document.getElementById('tripRoute').value;
+    const pickup = (document.getElementById('pickupPoint').value || '').toLowerCase().trim();
+    const dropoff = (document.getElementById('dropoffPoint').value || '').toLowerCase().trim();
+    const resultBox = document.getElementById('resultBox');
+    const priceText = document.getElementById('calculatedPrice');
 
-            if (!distance || isNaN(distance) || !carCategory) {
-                if(resultBox) resultBox.style.display = 'none';
-                return;
-            }
+    if (!carCategory) {
+        if(resultBox) resultBox.style.display = 'none';
+        return;
+    }
 
-            let ratePerKm = 10; 
-            if (carCategory === 'sedan') ratePerKm = 10;     
-            if (carCategory === 'suv') ratePerKm = 14;     
-            if (carCategory === 'hiace') ratePerKm =19;    
+    // التحقق من وجود نقطة انطلاق أو وصول بين دمياط وبورسعيد / المنصورة
+    const hasDamietta = pickup.includes('دمياط') || pickup.includes('damietta') || dropoff.includes('دمياط') || dropoff.includes('damietta');
+    const hasPortSaid = pickup.includes('بورسعيد') || pickup.includes('port said') || pickup.includes('portsaid') || dropoff.includes('بورسعيد') || dropoff.includes('port said') || dropoff.includes('portsaid');
+    const hasMansoura = pickup.includes('المنصورة') || pickup.includes('منصورة') || pickup.includes('mansoura') || dropoff.includes('المنصورة') || dropoff.includes('منصورة') || dropoff.includes('mansoura');
 
-            let totalPrice = distance * ratePerKm;
+    let totalPrice = 0;
+    let isFixedPrice = false;
 
-            if (tripRoute === 'roundtrip') {
-                totalPrice = totalPrice * 1.3; 
-            }
+    // 1. خط دمياط <-> بورسعيد (ثابت)
+    if (hasDamietta && hasPortSaid) {
+        isFixedPrice = true;
+        totalPrice = (tripRoute === 'roundtrip') ? 1600 : 1000;
+    }
+    // 2. خط دمياط <-> المنصورة (ثابت)
+    else if (hasDamietta && hasMansoura) {
+        isFixedPrice = true;
+        totalPrice = (tripRoute === 'roundtrip') ? 1800 : 1000;
+    }
 
-            if (totalPrice < 150) totalPrice = 150; 
-
-            if(priceText && resultBox) {
-                priceText.innerText = translations[currentLang].priceEst + Math.round(totalPrice) + translations[currentLang].egp;
-                resultBox.style.display = 'block';
-            }
+    // 3. باقي الطرق ونقاط التحرك (تسعير عادي بناءً على الكيلومترات)
+    if (!isFixedPrice) {
+        if (!distance || isNaN(distance)) {
+            if(resultBox) resultBox.style.display = 'none';
+            return;
         }
+
+        let ratePerKm = 10; 
+        if (carCategory === 'sedan') ratePerKm = 10;     
+        if (carCategory === 'suv') ratePerKm = 14;     
+        if (carCategory === 'hiace') ratePerKm = 18;    
+
+        totalPrice = distance * ratePerKm;
+
+        if (tripRoute === 'roundtrip') {
+            totalPrice = totalPrice * 1.4; 
+        }
+
+        if (totalPrice < 150) totalPrice = 150; 
+    }
+
+    if(priceText && resultBox) {
+        priceText.innerText = translations[currentLang].priceEst + Math.round(totalPrice) + translations[currentLang].egp;
+        resultBox.style.display = 'block';
+    }
+}
+    
+
 
         function submitToWebsite(event) {
             if(event) event.preventDefault();
